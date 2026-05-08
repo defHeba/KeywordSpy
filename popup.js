@@ -286,17 +286,36 @@ function renderCompareView() {
     </label>`).join('');
 
   // Restore previous selections on click
+// Handle selections properly
   checks.querySelectorAll('.compare-checkbox-item').forEach(item => {
-    item.addEventListener('click', () => {
-      item.classList.toggle('selected');
-      const ind = item.querySelector('.compare-check-indicator');
-      ind.textContent = item.classList.contains('selected') ? '✓' : '';
-    });
-  });
+    const checkbox = item.querySelector('input[type="checkbox"]');
+    const indicator = item.querySelector('.compare-check-indicator');
 
-  document.getElementById('compare-results').style.display = 'none';
-  switchView('compare');
-}
+    // Handle clicks on the row/label
+    item.addEventListener('click', (e) => {
+      // If we clicked the checkbox itself, let the browser handle it
+      if (e.target === checkbox) return;
+
+      // Otherwise, prevent default behavior and manually toggle
+      e.preventDefault();
+      checkbox.checked = !checkbox.checked;
+      updateRowState();
+    });
+
+    // Helper to update the visual "checked" state
+    function updateRowState() {
+      if (checkbox.checked) {
+        item.classList.add('selected');
+        indicator.textContent = '✓';
+      } else {
+        item.classList.remove('selected');
+        indicator.textContent = '';
+      }
+    }
+
+    // Sync state if the checkbox is clicked directly
+    checkbox.addEventListener('change', updateRowState);
+  });
 
 function runComparison() {
   const selected = [...document.querySelectorAll('.compare-checkbox-item.selected')].map(el => el.dataset.group);
